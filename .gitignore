@@ -1,9 +1,9 @@
 /littlecheckpoints
 /checkpoints
 /pics
-/_pychache_/
+/__pycache__
 /scripts
-/model/_pychache_/
+model/__pycache__/
 test.py
 *.out
 *.sh
