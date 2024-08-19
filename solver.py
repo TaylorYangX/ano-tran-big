@@ -31,8 +31,8 @@ class EarlyStopping:
         self.best_score = None
         self.best_score2 = None
         self.early_stop = False
-        self.val_loss_min = np.Inf
-        self.val_loss2_min = np.Inf
+        self.val_loss_min = np.inf
+        self.val_loss2_min = np.inf
         self.delta = delta
         self.dataset = dataset_name
 
@@ -239,7 +239,12 @@ class Solver(object):
         for i, (input_data, labels) in enumerate(self.train_loader):
             input = input_data.float().to(self.device)
             cri = self.model(input,50,0)
+            #cri = cri
+            print("cri shape is",cri.shape)
+            print(f"atten energy is on {attens_energy.device}")  # 输出: cpu
+            print(f"cri is on {cri.device}")  # 输出: cuda:0
             attens_energy = torch.cat((attens_energy, cri), dim=0)
+            
             # output, series, prior, _ = self.model(input)
             # loss = torch.mean(criterion(input, output), dim=-1)
             # if i<20:    
@@ -295,7 +300,7 @@ class Solver(object):
         attens_energy = torch.tensor([0])
         for i, (input_data, labels) in enumerate(self.thre_loader):
             input = input_data.float().to(self.device)
-            output, series, prior, _ = self.model(input)
+            #output, series, prior, _ = self.model(input)
             cri = self.model(input,50,0)
 
             attens_energy = torch.cat((attens_energy, cri), dim=0)

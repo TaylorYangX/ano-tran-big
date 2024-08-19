@@ -148,7 +148,7 @@ class AnomalyTransformer(nn.Module):
             # Metric
             metric = torch.softmax((-series_loss - prior_loss), dim=-1)
             cri = metric * loss
-            #cri = cri.detach().cpu().numpy()
+            cri = cri.detach().cpu()#.numpy()
             #attens_energy.append(cri)
             cri = cri.reshape(-1) #change it to 1d array
            
