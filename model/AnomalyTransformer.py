@@ -65,6 +65,7 @@ class AnomalyTransformer(nn.Module):
         self.output_attention = output_attention
         self.win_size = win_size
         self.criterion = nn.MSELoss()
+        self.criterionTest = nn.MSELoss(reduce=False)
 
         # Encoding
         self.embedding = DataEmbedding(enc_in, d_model, dropout)
@@ -94,7 +95,7 @@ class AnomalyTransformer(nn.Module):
         #when flag is 1,i will compute train
         #when flag is 0,i will compute test
 
-        if flag==1:
+        if flag==1: # for train
             series_loss = 0.0
             prior_loss = 0.0
             for u in range(len(prior)):
@@ -123,9 +124,39 @@ class AnomalyTransformer(nn.Module):
 
             rec_loss = self.criterion(enc_out, x)
 
+        elif flag ==0: #for test
+            loss = torch.mean(self.criterionTest(x, enc_out), dim=-1)
+            series_loss = 0.0
+            prior_loss = 0.0
+            for u in range(len(prior)):
+                if u == 0:
+                    series_loss = my_kl_loss(series[u], (
+                            prior[u] / torch.unsqueeze(torch.sum(prior[u], dim=-1), dim=-1).repeat(1, 1, 1,
+                                                                                                self.win_size)).detach()) * temperature
+                    prior_loss = my_kl_loss(
+                        (prior[u] / torch.unsqueeze(torch.sum(prior[u], dim=-1), dim=-1).repeat(1, 1, 1,
+                                                                                                self.win_size)),
+                        series[u].detach()) * temperature
+                else:
+                    series_loss += my_kl_loss(series[u], (
+                            prior[u] / torch.unsqueeze(torch.sum(prior[u], dim=-1), dim=-1).repeat(1, 1, 1,
+                                                                                                self.win_size)).detach()) * temperature
+                    prior_loss += my_kl_loss(
+                        (prior[u] / torch.unsqueeze(torch.sum(prior[u], dim=-1), dim=-1).repeat(1, 1, 1,
+                                                                                                self.win_size)),
+                        series[u].detach()) * temperature
+            # Metric
+            metric = torch.softmax((-series_loss - prior_loss), dim=-1)
+            cri = metric * loss
+            #cri = cri.detach().cpu().numpy()
+            #attens_energy.append(cri)
+            cri = cri.reshape(-1) #change it to 1d array
+           
+
         if self.output_attention and flag == 1:
             #return enc_out, series, prior, sigmas
             return series_loss,prior_loss,rec_loss
-
+        elif self.output_attention and flag == 0:
+            return cri
         else:
             return enc_out  # [B, L, D]
