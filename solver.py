@@ -100,7 +100,8 @@ class Solver(object):
         loss_2 = []
         for i, (input_data, _) in enumerate(vali_loader):
             input = input_data.float().to(self.device)
-            series_loss, prior_loss , rec_loss = self.model(input,1,1)
+            temflag = torch.zeros(input.shape)
+            series_loss, prior_loss , rec_loss = self.model(input,temflag)
             # output, series, prior, _ = self.model(input)
             # series_loss = 0.0
             # prior_loss = 0.0
@@ -150,7 +151,8 @@ class Solver(object):
                 self.optimizer.zero_grad()
                 iter_count += 1
                 input = input_data.float().to(self.device)
-                series_loss, prior_loss , rec_loss = self.model(input,1,1)
+                temflag = torch.zeros(input.shape)
+                series_loss, prior_loss , rec_loss = self.model(input,temflag)
 
                 # output, series, prior, _ = self.model(input)
                 # print("output shape is ",output.shape)
@@ -174,17 +176,17 @@ class Solver(object):
                 #         my_kl_loss(series[u].detach(), (
                 #                 prior[u] / torch.unsqueeze(torch.sum(prior[u], dim=-1), dim=-1).repeat(1, 1, 1,
                 #                                                                                        self.win_size)))))
-                if  i<20:    
-                    print("series loss is ",series_loss)
-                    print("prior loss is ",prior_loss)
-                    print("series loss shape is ",series_loss.shape)
-                    print("prior loss shape is ",prior_loss.shape)
-                # series_loss = series_loss / len(prior)
-                # prior_loss = prior_loss / len(prior)
-                # rec_loss = self.criterion(output, input) 
-                if  i<20:    
-                    print("rec loss is ",rec_loss)
-                    print("rec loss shape is ",rec_loss.shape)
+                # if  i<20:    
+                #     print("series loss is ",series_loss)
+                #     print("prior loss is ",prior_loss)
+                #     print("series loss shape is ",series_loss.shape)
+                #     print("prior loss shape is ",prior_loss.shape)
+                # # series_loss = series_loss / len(prior)
+                # # prior_loss = prior_loss / len(prior)
+                # # rec_loss = self.criterion(output, input) 
+                # if  i<20:    
+                #     print("rec loss is ",rec_loss)
+                #     print("rec loss shape is ",rec_loss.shape)
 
                 loss1_list.append((rec_loss - self.k * series_loss).item())
                 loss1 = rec_loss - self.k * series_loss
@@ -238,11 +240,12 @@ class Solver(object):
         attens_energy = torch.tensor([0])
         for i, (input_data, labels) in enumerate(self.train_loader):
             input = input_data.float().to(self.device)
-            cri = self.model(input,50,0)
+            temflag = torch.ones(input.shape)*temperature
+            cri = self.model(input,temflag)
             #cri = cri
-            print("cri shape is",cri.shape)
-            print(f"atten energy is on {attens_energy.device}")  # 输出: cpu
-            print(f"cri is on {cri.device}")  # 输出: cuda:0
+            # print("cri shape is",cri.shape)
+            # print(f"atten energy is on {attens_energy.device}")  # 输出: cpu
+            # print(f"cri is on {cri.device}")  # 输出: cuda:0
             attens_energy = torch.cat((attens_energy, cri), dim=0)
             
             # output, series, prior, _ = self.model(input)
@@ -301,7 +304,8 @@ class Solver(object):
         for i, (input_data, labels) in enumerate(self.thre_loader):
             input = input_data.float().to(self.device)
             #output, series, prior, _ = self.model(input)
-            cri = self.model(input,50,0)
+            temflag = torch.ones(input.shape)*temperature
+            cri = self.model(input,temflag)
 
             attens_energy = torch.cat((attens_energy, cri), dim=0)
 
@@ -343,7 +347,8 @@ class Solver(object):
         attens_energy = torch.tensor([0])
         for i, (input_data, labels) in enumerate(self.thre_loader):
             input = input_data.float().to(self.device)
-            cri = self.model(input,50,0)
+            temflag = torch.ones(input.shape)*temperature
+            cri = self.model(input,temflag)
             attens_energy = torch.cat((attens_energy, cri), dim=0)
             # output, series, prior, _ = self.model(input)
 

@@ -88,14 +88,15 @@ class AnomalyTransformer(nn.Module):
 
         self.projection = nn.Linear(d_model, c_out, bias=True)
 
-    def forward(self, x, temperature , flag):
+    def forward(self, x, temflag):
         enc_out = self.embedding(x)
         enc_out, series, prior, sigmas = self.encoder(enc_out)
         enc_out = self.projection(enc_out)
         #when flag is 1,i will compute train
         #when flag is 0,i will compute test
+        temperature = temflag[0][0][0]
 
-        if flag==1: # for train
+        if temperature==0: # for train
             series_loss = 0.0
             prior_loss = 0.0
             for u in range(len(prior)):
@@ -124,7 +125,7 @@ class AnomalyTransformer(nn.Module):
 
             rec_loss = self.criterion(enc_out, x)
 
-        elif flag ==0: #for test
+        else : #for test
             loss = torch.mean(self.criterionTest(x, enc_out), dim=-1)
             series_loss = 0.0
             prior_loss = 0.0
@@ -153,10 +154,10 @@ class AnomalyTransformer(nn.Module):
             cri = cri.reshape(-1) #change it to 1d array
            
 
-        if self.output_attention and flag == 1:
+        if self.output_attention and temperature == 0:
             #return enc_out, series, prior, sigmas
             return series_loss,prior_loss,rec_loss
-        elif self.output_attention and flag == 0:
+        elif self.output_attention and temperature != 0:
             return cri
         else:
             return enc_out  # [B, L, D]
