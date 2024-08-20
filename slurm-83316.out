@@ -1,5 +1,5 @@
 Model training started at 2024-08-19 22:29:45
-/home/zhanglong.yang/miniconda3/envs/Ano-GPU/lib/python3.9/site-packages/torch/nn/_reduction.py:42: UserWarning: size_average and reduce args will be deprecated, please use reduction='none' instead.
+/home/miniconda3/envs/Ano-GPU/lib/python3.9/site-packages/torch/nn/_reduction.py:42: UserWarning: size_average and reduce args will be deprecated, please use reduction='none' instead.
   warnings.warn(warning.format(ret))
 ------------ Options -------------
 anormly_ratio: 1.0
@@ -71,7 +71,7 @@ Epoch: 2 cost time: 515.030604839325
 Epoch: 2, Steps: 1934 | Train Loss: -48.4137607 Vali Loss: -46.3248478 
 EarlyStopping counter: 1 out of 3
 Updating learning rate to 5e-05
-/home/zhanglong.yang/miniconda3/envs/Ano-GPU/lib/python3.9/site-packages/torch/nn/_reduction.py:42: UserWarning: size_average and reduce args will be deprecated, please use reduction='none' instead.
+/home/miniconda3/envs/Ano-GPU/lib/python3.9/site-packages/torch/nn/_reduction.py:42: UserWarning: size_average and reduce args will be deprecated, please use reduction='none' instead.
   warnings.warn(warning.format(ret))
 ------------ Options -------------
 anormly_ratio: 1.0
