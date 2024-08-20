@@ -11,3 +11,4 @@ test.py
 ano-big.txt
 *.pth
 /SWaT
+!slurm-83316.out

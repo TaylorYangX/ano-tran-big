@@ -5,6 +5,7 @@ import torch.nn.functional as F
 from .attn import AnomalyAttention, AttentionLayer
 from .embed import DataEmbedding, TokenEmbedding
 
+
 def my_kl_loss(p, q):
     res = p * (torch.log(p + 0.0001) - torch.log(q + 0.0001))
     return torch.mean(torch.sum(res, dim=-1), dim=1)
@@ -92,72 +93,72 @@ class AnomalyTransformer(nn.Module):
         enc_out = self.embedding(x)
         enc_out, series, prior, sigmas = self.encoder(enc_out)
         enc_out = self.projection(enc_out)
-        #when flag is 1,i will compute train
-        #when flag is 0,i will compute test
-        temperature = temflag[0][0][0]
+        #50 = temflag[0][0][0]
 
-        if temperature==0: # for train
-            series_loss = 0.0
-            prior_loss = 0.0
-            for u in range(len(prior)):
-                series_loss += (torch.mean(my_kl_loss(series[u], (
+        # for train
+        series_loss = 0.0
+        prior_loss = 0.0
+        for u in range(len(prior)):
+            series_loss += (torch.mean(my_kl_loss(series[u], (
+                    prior[u] / torch.unsqueeze(torch.sum(prior[u], dim=-1), dim=-1).repeat(1, 1, 1,
+                                                                                            self.win_size)).detach())) + torch.mean(
+                my_kl_loss((prior[u] / torch.unsqueeze(torch.sum(prior[u], dim=-1), dim=-1).repeat(1, 1, 1,
+                                                                                                    self.win_size)).detach(),
+                            series[u])))
+            prior_loss += (torch.mean(my_kl_loss(
+                (prior[u] / torch.unsqueeze(torch.sum(prior[u], dim=-1), dim=-1).repeat(1, 1, 1,
+                                                                                        self.win_size)),
+                series[u].detach())) + torch.mean(
+                my_kl_loss(series[u].detach(), (
                         prior[u] / torch.unsqueeze(torch.sum(prior[u], dim=-1), dim=-1).repeat(1, 1, 1,
-                                                                                                self.win_size)).detach())) + torch.mean(
-                    my_kl_loss((prior[u] / torch.unsqueeze(torch.sum(prior[u], dim=-1), dim=-1).repeat(1, 1, 1,
-                                                                                                        self.win_size)).detach(),
-                                series[u])))
-                prior_loss += (torch.mean(my_kl_loss(
+                                                                                                self.win_size)))))
+
+        series_loss = series_loss / len(prior)
+        prior_loss = prior_loss / len(prior)
+
+        rec_loss = self.criterion(enc_out, x)
+        # 创建一个长度为 100 的张量，并填充 0
+        # threeloss = torch.zeros(x.shape[0] * x.shape[1], requires_grad=True, device=series_loss.device)
+
+        # threeloss[:3] = torch.stack([series_loss, prior_loss, rec_loss])
+        # 创建一个新张量，并将其与填充的部分连接起来
+        threeloss = torch.cat([torch.stack([series_loss, prior_loss, rec_loss]), torch.zeros(x.shape[0] * x.shape[1] - 3, device=series_loss.device)], dim=0)
+
+
+        
+
+        #for test
+        loss = torch.mean(self.criterionTest(x, enc_out), dim=-1)
+        oseries_loss = 0.0
+        oprior_loss = 0.0
+        for u in range(len(prior)):
+            if u == 0:
+                oseries_loss = my_kl_loss(series[u], (
+                        prior[u] / torch.unsqueeze(torch.sum(prior[u], dim=-1), dim=-1).repeat(1, 1, 1,
+                                                                                            self.win_size)).detach()) * 50
+                oprior_loss = my_kl_loss(
                     (prior[u] / torch.unsqueeze(torch.sum(prior[u], dim=-1), dim=-1).repeat(1, 1, 1,
                                                                                             self.win_size)),
-                    series[u].detach())) + torch.mean(
-                    my_kl_loss(series[u].detach(), (
-                            prior[u] / torch.unsqueeze(torch.sum(prior[u], dim=-1), dim=-1).repeat(1, 1, 1,
-                                                                                                    self.win_size)))))
-            '''
-            if  i<20:    
-                print("series loss is ",series_loss)
-                print("prior loss is ",prior_loss)
-                print("series loss shape is ",series_loss.shape)
-                print("prior loss shape is ",prior_loss.shape)
-            '''
-            series_loss = series_loss / len(prior)
-            prior_loss = prior_loss / len(prior)
+                    series[u].detach()) * 50
+            else:
+                oseries_loss += my_kl_loss(series[u], (
+                        prior[u] / torch.unsqueeze(torch.sum(prior[u], dim=-1), dim=-1).repeat(1, 1, 1,
+                                                                                            self.win_size)).detach()) * 50
+                oprior_loss += my_kl_loss(
+                    (prior[u] / torch.unsqueeze(torch.sum(prior[u], dim=-1), dim=-1).repeat(1, 1, 1,
+                                                                                            self.win_size)),
+                    series[u].detach()) * 50
+        # Metric
+        metric = torch.softmax((-oseries_loss - oprior_loss), dim=-1)
+        cri = metric * loss
+        cri = cri.detach().cpu()#.numpy()
+        #attens_energy.append(cri)
+        cri = cri.reshape(-1) #change it to 1d array
 
-            rec_loss = self.criterion(enc_out, x)
-
-        else : #for test
-            loss = torch.mean(self.criterionTest(x, enc_out), dim=-1)
-            series_loss = 0.0
-            prior_loss = 0.0
-            for u in range(len(prior)):
-                if u == 0:
-                    series_loss = my_kl_loss(series[u], (
-                            prior[u] / torch.unsqueeze(torch.sum(prior[u], dim=-1), dim=-1).repeat(1, 1, 1,
-                                                                                                self.win_size)).detach()) * temperature
-                    prior_loss = my_kl_loss(
-                        (prior[u] / torch.unsqueeze(torch.sum(prior[u], dim=-1), dim=-1).repeat(1, 1, 1,
-                                                                                                self.win_size)),
-                        series[u].detach()) * temperature
-                else:
-                    series_loss += my_kl_loss(series[u], (
-                            prior[u] / torch.unsqueeze(torch.sum(prior[u], dim=-1), dim=-1).repeat(1, 1, 1,
-                                                                                                self.win_size)).detach()) * temperature
-                    prior_loss += my_kl_loss(
-                        (prior[u] / torch.unsqueeze(torch.sum(prior[u], dim=-1), dim=-1).repeat(1, 1, 1,
-                                                                                                self.win_size)),
-                        series[u].detach()) * temperature
-            # Metric
-            metric = torch.softmax((-series_loss - prior_loss), dim=-1)
-            cri = metric * loss
-            cri = cri.detach().cpu()#.numpy()
-            #attens_energy.append(cri)
-            cri = cri.reshape(-1) #change it to 1d array
-           
-
-        if self.output_attention and temperature == 0:
+        if self.output_attention and temflag[0][0][0] == 0:
             #return enc_out, series, prior, sigmas
-            return series_loss,prior_loss,rec_loss
-        elif self.output_attention and temperature != 0:
+            return threeloss
+        elif self.output_attention and temflag[0][0][0] != 0:
             return cri
         else:
             return enc_out  # [B, L, D]

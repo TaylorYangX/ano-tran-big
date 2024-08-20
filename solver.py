@@ -101,7 +101,10 @@ class Solver(object):
         for i, (input_data, _) in enumerate(vali_loader):
             input = input_data.float().to(self.device)
             temflag = torch.zeros(input.shape)
-            series_loss, prior_loss , rec_loss = self.model(input,temflag)
+            outputs = self.model(input,temflag)
+            series_loss=outputs[0]
+            prior_loss=outputs[1]
+            rec_loss=outputs[2]
             # output, series, prior, _ = self.model(input)
             # series_loss = 0.0
             # prior_loss = 0.0
@@ -152,7 +155,10 @@ class Solver(object):
                 iter_count += 1
                 input = input_data.float().to(self.device)
                 temflag = torch.zeros(input.shape)
-                series_loss, prior_loss , rec_loss = self.model(input,temflag)
+                outputs = self.model(input,temflag)
+                series_loss=outputs[0]
+                prior_loss=outputs[1]
+                rec_loss=outputs[2]
 
                 # output, series, prior, _ = self.model(input)
                 # print("output shape is ",output.shape)
@@ -204,7 +210,7 @@ class Solver(object):
                 loss2.backward()
                 self.optimizer.step()
 
-                print("how many batches is ",i)
+                #print("how many batches is ",i)
             
             print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
             train_loss = np.average(loss1_list)
@@ -240,7 +246,7 @@ class Solver(object):
         attens_energy = torch.tensor([0])
         for i, (input_data, labels) in enumerate(self.train_loader):
             input = input_data.float().to(self.device)
-            temflag = torch.ones(input.shape)*temperature
+            temflag = torch.ones(input.shape)
             cri = self.model(input,temflag)
             #cri = cri
             # print("cri shape is",cri.shape)
@@ -304,7 +310,7 @@ class Solver(object):
         for i, (input_data, labels) in enumerate(self.thre_loader):
             input = input_data.float().to(self.device)
             #output, series, prior, _ = self.model(input)
-            temflag = torch.ones(input.shape)*temperature
+            temflag = torch.ones(input.shape)
             cri = self.model(input,temflag)
 
             attens_energy = torch.cat((attens_energy, cri), dim=0)
@@ -347,7 +353,7 @@ class Solver(object):
         attens_energy = torch.tensor([0])
         for i, (input_data, labels) in enumerate(self.thre_loader):
             input = input_data.float().to(self.device)
-            temflag = torch.ones(input.shape)*temperature
+            temflag = torch.ones(input.shape)
             cri = self.model(input,temflag)
             attens_energy = torch.cat((attens_energy, cri), dim=0)
             # output, series, prior, _ = self.model(input)

@@ -1,0 +1,107 @@
+Model training started at 2024-08-19 22:29:45
+/home/zhanglong.yang/miniconda3/envs/Ano-GPU/lib/python3.9/site-packages/torch/nn/_reduction.py:42: UserWarning: size_average and reduce args will be deprecated, please use reduction='none' instead.
+  warnings.warn(warning.format(ret))
+------------ Options -------------
+anormly_ratio: 1.0
+batch_size: 256
+data_path: SWaT
+dataset: SWaT
+input_c: 51
+k: 3
+lr: 0.0001
+mode: train
+model_save_path: checkpoints
+num_epochs: 2
+output_c: 51
+pretrained_model: None
+win_size: 100
+-------------- End ----------------
+test: (449919, 51)
+train: (495000, 51)
+test: (449919, 51)
+train: (495000, 51)
+test: (449919, 51)
+train: (495000, 51)
+test: (449919, 51)
+train: (495000, 51)
+======================TRAIN MODE======================
+	speed: 0.2719s/iter; left time: 1024.8262s
+	speed: 0.2667s/iter; left time: 978.5869s
+	speed: 0.2666s/iter; left time: 951.5281s
+	speed: 0.2666s/iter; left time: 924.8014s
+	speed: 0.2668s/iter; left time: 898.7299s
+	speed: 0.2668s/iter; left time: 872.0590s
+	speed: 0.2668s/iter; left time: 845.4006s
+	speed: 0.2670s/iter; left time: 819.3779s
+	speed: 0.2672s/iter; left time: 793.2109s
+	speed: 0.2669s/iter; left time: 765.6108s
+	speed: 0.2671s/iter; left time: 739.6434s
+	speed: 0.2669s/iter; left time: 712.2263s
+	speed: 0.2669s/iter; left time: 685.7419s
+	speed: 0.2671s/iter; left time: 659.3868s
+	speed: 0.2668s/iter; left time: 632.0901s
+	speed: 0.2668s/iter; left time: 605.4024s
+	speed: 0.2668s/iter; left time: 578.6641s
+	speed: 0.2668s/iter; left time: 551.9564s
+	speed: 0.2668s/iter; left time: 525.3341s
+Epoch: 1 cost time: 516.6537432670593
+Epoch: 1, Steps: 1934 | Train Loss: -47.4047200 Vali Loss: -45.6789869 
+Validation loss decreased (inf --> -45.678987).  Saving model ...
+Updating learning rate to 0.0001
+	speed: 1.8460s/iter; left time: 3387.4054s
+	speed: 0.2663s/iter; left time: 461.9501s
+	speed: 0.2663s/iter; left time: 435.4201s
+	speed: 0.2663s/iter; left time: 408.7027s
+	speed: 0.2666s/iter; left time: 382.5791s
+	speed: 0.2664s/iter; left time: 355.5855s
+	speed: 0.2664s/iter; left time: 328.9534s
+	speed: 0.2666s/iter; left time: 302.5382s
+	speed: 0.2667s/iter; left time: 275.9851s
+	speed: 0.2666s/iter; left time: 249.2767s
+	speed: 0.2666s/iter; left time: 222.6034s
+	speed: 0.2664s/iter; left time: 195.7773s
+	speed: 0.2664s/iter; left time: 169.1807s
+	speed: 0.2664s/iter; left time: 142.5023s
+	speed: 0.2663s/iter; left time: 115.8596s
+	speed: 0.2663s/iter; left time: 89.2052s
+	speed: 0.2663s/iter; left time: 62.5781s
+	speed: 0.2663s/iter; left time: 35.9500s
+	speed: 0.2663s/iter; left time: 9.3215s
+Epoch: 2 cost time: 515.030604839325
+Epoch: 2, Steps: 1934 | Train Loss: -48.4137607 Vali Loss: -46.3248478 
+EarlyStopping counter: 1 out of 3
+Updating learning rate to 5e-05
+/home/zhanglong.yang/miniconda3/envs/Ano-GPU/lib/python3.9/site-packages/torch/nn/_reduction.py:42: UserWarning: size_average and reduce args will be deprecated, please use reduction='none' instead.
+  warnings.warn(warning.format(ret))
+------------ Options -------------
+anormly_ratio: 1.0
+batch_size: 256
+data_path: SWaT
+dataset: SWaT
+input_c: 51
+k: 3
+lr: 0.0001
+mode: test
+model_save_path: checkpoints
+num_epochs: 3
+output_c: 51
+pretrained_model: 20
+win_size: 100
+-------------- End ----------------
+test: (449919, 51)
+train: (495000, 51)
+test: (449919, 51)
+train: (495000, 51)
+test: (449919, 51)
+train: (495000, 51)
+test: (449919, 51)
+train: (495000, 51)
+======================TEST MODE======================
+Threshold : 0.00042336743
+pred:    (449900,)
+gt:      (449900,)
+pred:  (449900,)
+gt:    (449900,)
+Accuracy : 0.9854, Precision : 0.8929, Recall : 1.0000, F-score : 0.9434 
+Model training ended at 2024-08-19 23:01:37
+Model training duration: 1912 seconds
